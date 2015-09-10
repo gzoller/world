@@ -3,7 +3,7 @@
 # 
 
 # Pull base image.
-FROM rabbitmq
+FROM dockerfile/rabbitmq
 
 # Add files.
 ADD bin/start /usr/local/bin/
