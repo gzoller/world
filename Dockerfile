@@ -1,7 +1,3 @@
-#
-# CapitalOne Development "World" Dockerfile
-# 
-
 # Pull base image.
 FROM dockerfile/rabbitmq
 
