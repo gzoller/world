@@ -1,26 +1,24 @@
 # Pull base image.
-FROM dockerfile/rabbitmq
+#FROM dockerfile/rabbitmq
+FROM rabbitmq
 
 # Add files.
 ADD bin/start /usr/local/bin/
+ADD bin/harness.json /usr/share/nginx/www/
 
 # Install RabbitMQ.
+#  rabbitmq-plugins enable rabbitmq_management && 
 RUN \
-  rabbitmq-plugins enable rabbitmq_management && \
   apt-get update && \
   apt-get -y install mongodb && \
+  apt-get -y install memcached && \
+  apt-get -y install nginx && \
   sed 's/^bind_ip/#bind_ip/' -i /etc/mongodb.conf && \
+  sed 's/HOSTIP/$HOST_IP/g' -i /usr/share/nginx/www/harness.json && \
   chmod +x /usr/local/bin/start
 
-# Define environment variables.
-#ENV RABBITMQ_LOG_BASE /data/log
-#ENV RABBITMQ_MNESIA_BASE /data/mnesia
-
-# Define mount points.
-#VOLUME ["/data/log", "/data/mnesia"]
-
-# Define working directory.
-#WORKDIR /data
+# WWW DocRoot
+# /usr/share/nginx/www
 
 # Define default command.
 CMD ["start"]
@@ -32,3 +30,7 @@ EXPOSE 15672
 # - Docker
 EXPOSE 28018
 EXPOSE 27017
+# - memcached
+EXPOSE 11211
+# - nginx
+EXPOSE 80
