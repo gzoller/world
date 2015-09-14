@@ -18,3 +18,11 @@ Now you should have gzoller/world in your docker images.  Use the go.sh script p
 | 27017 | MongoDB
 | 28017 | MongoDB (web status)
 | 11211 | memcached
+
+To connect to these facilities you'll need to know the IP address for Docker as exposed by your VM.  For docker-machine you can find this by:
+
+```
+$ docker-machine ip default
+```
+
+On my machine this resolves to 192.168.99.100, so to connect to RabbitMQ's web UI I would point my browser to http://192.168.99.100:15672, and I'd connect to mongodb with 192.168.99.10:27017, and so forth.
