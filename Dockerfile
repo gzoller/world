@@ -1,5 +1,4 @@
 # Pull base image.
-#FROM dockerfile/rabbitmq
 FROM rabbitmq
 
 # Add files.
