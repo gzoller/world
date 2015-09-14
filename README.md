@@ -1,5 +1,7 @@
 # world
-A "world server" for server-side development including MongoDB, RabbitMQ, and more.
+A "world server" for server-side development including MongoDB, RabbitMQ, and more.  The beauty of something like this is that you don't need to install all these infrastructure things on your machine so clean-up is instantaneous when you stop the container.
+
+Note: In this stock version data volumes are not saved!  When you stop the container all data stored in MongoDB and other stores will be lost!  This can be a handy thing for QA where you want to forklift in data packs for testing, but may not be what you wish for other kinds of work.  In this case you can mount a persistent volume from your host machine with Docker's -v argument.
 
 ## Use
 ```
