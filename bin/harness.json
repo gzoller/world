@@ -17,7 +17,7 @@
 		},
 		"cache":{
 			"memcached":{
-				"uris":["HOSTIP"]
+				"uris":["HOSTIP:11211"]
 			}
 		}
 	},

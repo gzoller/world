@@ -11,6 +11,7 @@ RUN \
   apt-get -y install memcached && \
   apt-get -y install nginx && \
   sed 's/^bind_ip/#bind_ip/' -i /etc/mongodb.conf && \
+  sed 's/^-l 127\.0\.0\.1/#-l 127\.0\.0\.1/' -i /etc/memcached.conf && \
   chmod +x /usr/local/bin/start
 
 # WWW DocRoot
