@@ -5,15 +5,12 @@ FROM rabbitmq
 ADD bin/start /usr/local/bin/
 ADD bin/harness.json /usr/share/nginx/www/
 
-# Install RabbitMQ.
-#  rabbitmq-plugins enable rabbitmq_management && 
 RUN \
   apt-get update && \
   apt-get -y install mongodb && \
   apt-get -y install memcached && \
   apt-get -y install nginx && \
   sed 's/^bind_ip/#bind_ip/' -i /etc/mongodb.conf && \
-  sed 's/HOSTIP/$HOST_IP/g' -i /usr/share/nginx/www/harness.json && \
   chmod +x /usr/local/bin/start
 
 # WWW DocRoot

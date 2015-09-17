@@ -1,0 +1,1 @@
+  sed 's/HOSTIP/$HOST_IP/g' -i /usr/share/nginx/www/harness.json && \

@@ -4,10 +4,22 @@
 	"description":"All-in-one 'world' incl. mongodb, rabbitmq, memcached, nginx, and more."
 	"env" : "Disposable",
 	"isProd" : false,
-	"locations":{
-		"mongo":{"host":"HOSTIP"},
-		"rabbitmq":{"host":"HOSTIP"},
-		"memcached":{"host":"HOSTIP"}
+	"facilities":{
+		"storage":{
+			"mongoDB":{
+				"uris":["HOSTIP"]
+			}
+		},
+		"queue":{
+			"rabbitMQ":{
+				"host":"HOSTIP"
+			}
+		},
+		"cache":{
+			"memcached":{
+				"uris":["HOSTIP"]
+			}
+		}
 	},
 	"applications":[
 	]
