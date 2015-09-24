@@ -4,4 +4,18 @@ sed 's/HOSTIP/'"$HOST_IP"'/g' -i /usr/share/nginx/www/harness.json
 service mongodb start
 service memcached start
 service nginx start
+
+# If user has mounted (vid Docker's -v argument) a directory /import then we'll 
+# slurp data from that directory into MongoDB using the file names as collection names.
+if [ -d "/import" ]; then
+	for dbdir in $(ls -d /import/*); do
+		db=$(basename $dbdir)
+		for f in $(ls $dbdir/*.js); do
+			filename=$(basename $f)
+			coll=${filename%.*}
+			mongoimport --db $db --collection $coll --file $f
+		done
+	done
+fi
+
 rabbitmq-server

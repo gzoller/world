@@ -36,3 +36,20 @@ $ docker-machine ip default
 ```
 
 On my machine this resolves to 192.168.99.100, so to connect to RabbitMQ's web UI I would point my browser to http://192.168.99.100:15672, and I'd connect to mongodb with 192.168.99.10:27017, and so forth.
+
+###Automatic Data Loading
+The World server has the ability to auto-detect and auto-load JSON data into MongoDB.  Create a directory, say /home/mydata, which contains subdirectories named after databases you want in MongoDB.  In each subdirectory put a file named after a desired collection with a '.js' suffix.  The format of the data file is the same as acceptable for mongoimport.
+
+For example this structure:
+
+    /home/mydata
+    	/users
+    		oldUsers.js
+    		newUsers.js
+    	/customers
+    		good.js
+    		bad.js
+
+When mounted properly (see below) this will create 2 databases in MongoDB: users and customers.  The users database will then load 2 collections, oldUsers and newUsers, while the customers database will load collections good and bad.
+
+Run go.sh script, passing /home/mydata (your host's data directory) as a parameter to the script and when the World comes up (and assuming you don't have errors in your structure or JSON) you'll have data loaded automatically!
