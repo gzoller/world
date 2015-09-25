@@ -1,7 +1,7 @@
 {
 	"name":"World Server",
 	"version":1,
-	"description":"All-in-one 'world' incl. mongodb, rabbitmq, memcached, nginx, and more."
+	"description":"All-in-one 'world' incl. mongodb, rabbitmq, memcached, nginx, and more.",
 	"env" : "Disposable",
 	"isProd" : false,
 	"facilities":{

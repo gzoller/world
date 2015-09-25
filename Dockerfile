@@ -7,7 +7,9 @@ ADD bin/harness.json /usr/share/nginx/www/
 ADD bin/rabbitmq.config /etc/rabbitmq/rabbitmq.config
 
 RUN \
+  echo "deb http://ftp.us.debian.org/debian wheezy-backports main" >> /etc/apt/sources.list && \
   apt-get update && \
+  apt-get -y install jq && \
   apt-get -y install mongodb && \
   apt-get -y install memcached && \
   apt-get -y install nginx && \

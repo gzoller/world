@@ -52,4 +52,13 @@ For example this structure:
 
 When mounted properly (see below) this will create 2 databases in MongoDB: users and customers.  The users database will then load 2 collections, oldUsers and newUsers, while the customers database will load collections good and bad.
 
-Run go.sh script, passing /home/mydata (your host's data directory) as a parameter to the script and when the World comes up (and assuming you don't have errors in your structure or JSON) you'll have data loaded automatically!
+Run go.sh script, passing '-i /home/mydata' (your host's data directory) as a parameter to the script and when the World comes up (and assuming you don't have errors in your structure or JSON) you'll have data loaded automatically!
+
+###Augmenting Application Config
+One of the features of the World server is a self-referencing wiring harness available at `http://your_ip/harness.json`.  In this JSON there's an 'applications' section, which is a list of, well, anything you need.
+
+To add content to that section simply create JSON objects in a file called "app.config" and put it in a directory.  Then pass this directory to the -e parameter of go.sh:
+
+    ./go.sh -e /users/me/my/stuff
+
+

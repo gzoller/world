@@ -18,4 +18,13 @@ if [ -d "/import" ]; then
 	done
 fi
 
+# If /extra is mounted then look for app.config file and glom its contents
+# into the 'applications' section of harness.json
+
+if [ -e "/extra/app.config" ]; then
+	appconfig=`cat /extra/app.config`
+	jq ".applications |= .+ [ $appconfig ]" /usr/share/nginx/www/harness.json > _js_tmp
+	mv _js_tmp /usr/share/nginx/www/harness.json
+fi
+
 rabbitmq-server
