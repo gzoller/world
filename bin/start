@@ -7,8 +7,8 @@ service nginx start
 
 # If user has mounted (vid Docker's -v argument) a directory /import then we'll 
 # slurp data from that directory into MongoDB using the file names as collection names.
-if [ -d "/import" ]; then
-	for dbdir in $(ls -d /import/*); do
+if [ -d "/extra/mongo" ]; then
+	for dbdir in $(ls -d /extra/mongo/*); do
 		db=$(basename $dbdir)
 		for f in $(ls $dbdir/*.js); do
 			filename=$(basename $f)
@@ -21,10 +21,14 @@ fi
 # If /extra is mounted then look for app.config file and glom its contents
 # into the 'applications' section of harness.json
 
-if [ -e "/extra/app.config" ]; then
-	appconfig=`cat /extra/app.config`
+if [ -e "/extra/config/app.config" ]; then
+	appconfig=`cat /extra/config/app.config`
 	jq ".applications |= .+ [ $appconfig ]" /usr/share/nginx/www/harness.json > _js_tmp
 	mv _js_tmp /usr/share/nginx/www/harness.json
+fi
+
+if [ -d "/extra/http" ]; then
+	cp /extra/http/* /usr/share/nginx/www/
 fi
 
 rabbitmq-server

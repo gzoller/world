@@ -37,28 +37,25 @@ $ docker-machine ip default
 
 On my machine this resolves to 192.168.99.100, so to connect to RabbitMQ's web UI I would point my browser to http://192.168.99.100:15672, and I'd connect to mongodb with 192.168.99.10:27017, and so forth.
 
-###Automatic Data Loading
-The World server has the ability to auto-detect and auto-load JSON data into MongoDB.  Create a directory, say /home/mydata, which contains subdirectories named after databases you want in MongoDB.  In each subdirectory put a file named after a desired collection with a '.js' suffix.  The format of the data file is the same as acceptable for mongoimport.
+###Augmenting the World
+The World server has the ability to pre-load information on startup.  You do this by supplying an optional argument to the go.sh script when you run it.  This argument is a path to a directory formatted as shown below:
 
-For example this structure:
+    /extra
+    	/config
+    		app.config
+    	/http
+    	/mongo
+    		dbname1
+    			coll1.js
+    			coll2.js
+    		dbname2
+    			coll3.js
+    			coll4.js
 
-    /home/mydata
-    	/users
-    		oldUsers.js
-    		newUsers.js
-    	/customers
-    		good.js
-    		bad.js
+/extra is the top-level directory you supply (the full path) to the argument:  `go.sh /my/path/extra` 
 
-When mounted properly (see below) this will create 2 databases in MongoDB: users and customers.  The users database will then load 2 collections, oldUsers and newUsers, while the customers database will load collections good and bad.
+The config directory contains the app.config file.  This is a comma-separated set of JSON objects which comprise any application-specific configuration you want, in any structure you need.  This information will be inserted into the applications:[ ] array in harness.json, read by your applications on start-up.
 
-Run go.sh script, passing '-i /home/mydata' (your host's data directory) as a parameter to the script and when the World comes up (and assuming you don't have errors in your structure or JSON) you'll have data loaded automatically!
+The http directory's contents will be dumped into nginx's docroot directory.
 
-###Augmenting Application Config
-One of the features of the World server is a self-referencing wiring harness available at `http://your_ip/harness.json`.  In this JSON there's an 'applications' section, which is a list of, well, anything you need.
-
-To add content to that section simply create JSON objects in a file called "app.config" and put it in a directory.  Then pass this directory to the -e parameter of go.sh:
-
-    ./go.sh -e /users/me/my/stuff
-
-
+The contents of the mongo directory will be pre-loaded into mongo.  The subdirs (dbname1, dbname2) will be the names of the databases used, and coll1.js, coll2.js, etc., will be the collection names.  The contents of the .js files should be compatible with mongoimport (i.e. one JSON object per line)
