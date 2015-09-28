@@ -1,7 +1,7 @@
 #!/bin/bash
 
 extra=""
-if [ -d $1 ]; then
+if [ ! -z "$1" ]; then
   extra="-v $1:/extra"
 fi
 
