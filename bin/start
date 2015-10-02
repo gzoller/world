@@ -1,6 +1,9 @@
 #!/bin/bash
 
 sed 's/HOSTIP/'"$HOST_IP"'/g' -i /usr/share/nginx/www/harness.json
+cid=`cat /proc/self/cgroup | grep 'docker' | sed 's/^.*\///' | tail -n1`
+sed "s/\"applications\"/\"containerId\":\"$cid\",\n\t\"applications\"/" -i /usr/share/nginx/www/harness.json
+
 service mongodb start
 service memcached start
 service nginx start
