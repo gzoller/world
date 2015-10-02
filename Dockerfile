@@ -3,7 +3,7 @@ FROM rabbitmq
 
 # Add files.
 ADD bin/start /usr/local/bin/
-ADD bin/harness.json /usr/share/nginx/www/
+ADD bin/harness.json /var/www/html/
 ADD bin/rabbitmq.config /etc/rabbitmq/rabbitmq.config
 
 RUN \

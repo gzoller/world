@@ -1,8 +1,8 @@
 #!/bin/bash
 
-sed 's/HOSTIP/'"$HOST_IP"'/g' -i /usr/share/nginx/www/harness.json
+sed 's/HOSTIP/'"$HOST_IP"'/g' -i /var/www/html/harness.json
 cid=`cat /proc/self/cgroup | grep 'docker' | sed 's/^.*\///' | tail -n1`
-sed "s/\"applications\"/\"containerId\":\"$cid\",\n\t\"applications\"/" -i /usr/share/nginx/www/harness.json
+sed "s/\"applications\"/\"containerId\":\"$cid\",\n\t\"applications\"/" -i /var/www/html/harness.json
 
 service mongodb start
 service memcached start
@@ -26,12 +26,12 @@ fi
 
 if [ -e "/extra/config/app.config" ]; then
 	appconfig=`cat /extra/config/app.config`
-	jq ".applications |= .+ [ $appconfig ]" /usr/share/nginx/www/harness.json > _js_tmp
-	mv _js_tmp /usr/share/nginx/www/harness.json
+	jq ".applications |= .+ [ $appconfig ]" /var/www/html/harness.json > _js_tmp
+	mv _js_tmp /var/www/html/harness.json
 fi
 
 if [ -d "/extra/http" ]; then
-	cp /extra/http/* /usr/share/nginx/www/
+	cp /extra/http/* /var/www/html/
 fi
 
 rabbitmq-server
