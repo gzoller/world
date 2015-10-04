@@ -24,4 +24,6 @@ curl http://$DMIP:$HttpPort > /dev/null 2>&1
 while [ $? -ne 0 ]; do !!; done
 
 # 4. Push port mappings back to World so it can update harness.json
-curl --data "http=$HttpPort&mongo=$MongoPort&rabbit=$RabbitPort&memcached=$MemcachePort" http://$DMIP:$HttpPort/portmap.pl
+curl --data "http=$HttpPort&mongo=$MongoPort&rabbit=$RabbitPort&memcached=$MemcachePort" http://$DMIP:$HttpPort/portmap.pl> /dev/null 2>&1
+
+echo $CID
