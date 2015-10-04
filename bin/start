@@ -1,6 +1,8 @@
 #!/bin/bash
 
 sed 's/HOSTIP/'"$HOST_IP"'/g' -i /var/www/html/harness.json
+cid=`cat /proc/self/cgroup | grep 'docker' | sed 's/^.*\///' | tail -n1`
+sed "s/\"applications\"/\"containerId\":\"$cid\",\n\t\"applications\"/" -i /var/www/html/harness.json
 
 if [ -e "/extra/config/app.config" ]; then
 	appconfig=`cat /extra/config/app.config`
