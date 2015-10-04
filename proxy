@@ -1,5 +1,0 @@
-docker-machine create \
-  --driver virtualbox \
-  --engine-env HTTP_PROXY=http://username:password@proxy.kdc.capitalone.com:8099/ \
-  --engine-env HTTPS_PROXY=http://username:password@proxy.kdc.capitalone.com:8099/ \
-  mine

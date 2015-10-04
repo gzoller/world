@@ -1,12 +1,19 @@
 #!/bin/bash
 
 sed 's/HOSTIP/'"$HOST_IP"'/g' -i /var/www/html/harness.json
-cid=`cat /proc/self/cgroup | grep 'docker' | sed 's/^.*\///' | tail -n1`
-sed "s/\"applications\"/\"containerId\":\"$cid\",\n\t\"applications\"/" -i /var/www/html/harness.json
+
+if [ -e "/extra/config/app.config" ]; then
+	appconfig=`cat /extra/config/app.config`
+	jq ".applications |= .+ [ $appconfig ]" /var/www/html/harness.json > /tmp/nginx/harness.json
+	cp /tmp/nginx/harness.json /var/www/html/harness.json
+	chmod a+wr /tmp/nginx/harness.json
+fi
+
+service fcgiwrap start
+service nginx start
 
 service mongodb start
 service memcached start
-service nginx start
 
 # If user has mounted (vid Docker's -v argument) a directory /import then we'll 
 # slurp data from that directory into MongoDB using the file names as collection names.
@@ -23,12 +30,6 @@ fi
 
 # If /extra is mounted then look for app.config file and glom its contents
 # into the 'applications' section of harness.json
-
-if [ -e "/extra/config/app.config" ]; then
-	appconfig=`cat /extra/config/app.config`
-	jq ".applications |= .+ [ $appconfig ]" /var/www/html/harness.json > _js_tmp
-	mv _js_tmp /var/www/html/harness.json
-fi
 
 if [ -d "/extra/http" ]; then
 	cp /extra/http/* /var/www/html/
