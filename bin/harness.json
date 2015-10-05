@@ -5,6 +5,9 @@
 	"env" : "Disposable",
 	"isProd" : false,
 	"facilities":{
+		"http":{
+			"port":80
+		},
 		"storage":{
 			"mongoDB":{
 				"uris":["HOSTIP"]

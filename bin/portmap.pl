@@ -36,6 +36,9 @@ if ('POST' eq $c->request_method ) {
 	# RabbitMQ
 	$$harness{"facilities"}{"queue"}{"rabbitMQ"}{"port"} = $rabbit;
 
+	# HTTP
+	$$harness{"facilities"}{"http"}{"port"} = $http;
+
 	my $jsonOut = encode_json (\%$harness);
 
 	open(my $fh, '>', '/var/www/html/harness.json');
