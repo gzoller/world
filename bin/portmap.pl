@@ -40,6 +40,7 @@ if ('POST' eq $c->request_method ) {
 	$$harness{"facilities"}{"http"}{"port"} = $http;
 
 	my $jsonOut = encode_json (\%$harness);
+	$jsonOut =~ s/HTTPPORT/$http/g;
 
 	open(my $fh, '>', '/var/www/html/harness.json');
 	print $fh $jsonOut;
