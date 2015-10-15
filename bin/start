@@ -1,8 +1,27 @@
 #!/bin/bash
 
+export DOCKER_CERT_PATH=/mnt/certs
+export DOCKER_HOST=tcp://$HOST_IP:2376
+portster &
+
+checkPorts() {
+	wget -qO- localhost:1411/ping
+}
+
+checkPorts
+until [ $? -eq 0 ]; do
+	checkPorts
+done 
+HTTP_PORT="`wget -qO- localhost:1411/port/80`"
+MONGO_PORT="`wget -qO- localhost:1411/port/27017`"
+MEMCACHE_PORT="`wget -qO- localhost:1411/port/11211`"
+RABBIT_PORT="`wget -qO- localhost:1411/port/5672`"
+
 sed 's/HOSTIP/'"$HOST_IP"'/g' -i /var/www/html/harness.json
-cid=`cat /proc/self/cgroup | grep 'docker' | sed 's/^.*\///' | tail -n1`
-sed "s/\"applications\"/\"containerId\":\"$cid\",\n\t\"applications\"/" -i /var/www/html/harness.json
+sed 's/HTTP_PORT/'"$HTTP_PORT"'/g' -i /var/www/html/harness.json
+sed 's/MONGO_PORT/'"$MONGO_PORT"'/g' -i /var/www/html/harness.json
+sed 's/MEMCACHE_PORT/'"$MEMCACHE_PORT"'/g' -i /var/www/html/harness.json
+sed 's/RABBIT_PORT/'"$RABBIT_PORT"'/g' -i /var/www/html/harness.json
 
 if [ -e "/extra/config/app.config" ]; then
 	appconfig=`cat /extra/config/app.config`
@@ -11,9 +30,7 @@ if [ -e "/extra/config/app.config" ]; then
 	chmod a+wr /tmp/nginx/harness.json
 fi
 
-service fcgiwrap start
 service nginx start
-
 service mongodb start
 service memcached start
 

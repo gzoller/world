@@ -4,23 +4,25 @@
 	"description":"All-in-one 'world' incl. mongodb, rabbitmq, memcached, nginx, and more.",
 	"env" : "Disposable",
 	"isProd" : false,
+	"isContainer" : true,
 	"facilities":{
 		"http":{
-			"port":80
+			"port":HTTP_PORT
 		},
 		"storage":{
 			"mongoDB":{
-				"uris":["HOSTIP"]
+				"uris":["HOSTIP:MONGO_PORT"]
 			}
 		},
 		"queue":{
 			"rabbitMQ":{
-				"host":"HOSTIP"
+				"host":"HOSTIP",
+				"port":RABBIT_PORT
 			}
 		},
 		"cache":{
 			"memcached":{
-				"uris":["HOSTIP:11211"]
+				"uris":["HOSTIP:MEMCACHE_PORT"]
 			}
 		}
 	},
