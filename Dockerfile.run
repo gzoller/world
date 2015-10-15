@@ -9,10 +9,11 @@ ADD portster /usr/local/bin/
 ADD containerId.sh /usr/local/bin/
 
 RUN \
-  mkdir /tmp/nginx && \
+  sed 's/root .*\;/root \/var\/www\/html\;/' -i /etc/nginx/sites-enabled/default && \
   chmod a+wrx /tmp/nginx && \
   chmod a+wr /var/www/html/harness.json && \
   echo "deb http://ftp.us.debian.org/debian wheezy-backports main" >> /etc/apt/sources.list && \
+  apt-get clean && \
   apt-get update && \
   apt-get -y install mongodb && \
   apt-get -y install memcached && \
