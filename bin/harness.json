@@ -17,7 +17,7 @@
 		"queue":{
 			"rabbitMQ":{
 				"host":"HOSTIP",
-				"port":"RABBIT_PORT"
+				"port":RABBIT_PORT
 			}
 		},
 		"cache":{
