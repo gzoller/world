@@ -16,8 +16,12 @@
 		},
 		"queue":{
 			"rabbitMQ":{
-				"host":"HOSTIP",
-				"port":RABBIT_PORT
+				"hosts":[{
+					"host":"HOSTIP",
+					"port":RABBIT_PORT
+					}],
+				"uid":"guest",
+				"pwd":"guest"
 			}
 		},
 		"cache":{
