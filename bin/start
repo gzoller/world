@@ -57,6 +57,6 @@ if [ -d "/extra/http" ]; then
 fi
 
 # fakes3 S3 simulator
-fakes3 -r ~/fakes3_root -p 10001
+fakes3 -r ~/fakes3_root -p 10001 &
 
 rabbitmq-server
