@@ -12,6 +12,11 @@
 		"storage":{
 			"mongoDB":{
 				"uris":["HOSTIP:MONGO_PORT"]
+			},
+			"s3":{
+				"uid":"123",
+				"pwd":"abc",
+				"endpoint":"http://HOSTIP:S3_PORT"
 			}
 		},
 		"queue":{

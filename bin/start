@@ -16,12 +16,14 @@ HTTP_PORT="`wget -qO- localhost:1411/port/80`"
 MONGO_PORT="`wget -qO- localhost:1411/port/27017`"
 MEMCACHE_PORT="`wget -qO- localhost:1411/port/11211`"
 RABBIT_PORT="`wget -qO- localhost:1411/port/5672`"
+S3_PORT="`wget -qO- localhost:1411/port/10001`"
 
 sed 's/HOSTIP/'"$HOST_IP"'/g' -i /var/www/html/harness.json
 sed 's/HTTP_PORT/'"$HTTP_PORT"'/g' -i /var/www/html/harness.json
 sed 's/MONGO_PORT/'"$MONGO_PORT"'/g' -i /var/www/html/harness.json
 sed 's/MEMCACHE_PORT/'"$MEMCACHE_PORT"'/g' -i /var/www/html/harness.json
 sed 's/RABBIT_PORT/'"$RABBIT_PORT"'/g' -i /var/www/html/harness.json
+sed 's/S3_PORT/'"$S3_PORT"'/g' -i /var/www/html/harness.json
 
 if [ -e "/extra/config/app.config" ]; then
 	appconfig=`cat /extra/config/app.config`
@@ -53,5 +55,8 @@ fi
 if [ -d "/extra/http" ]; then
 	cp /extra/http/* /var/www/html/
 fi
+
+# fakes3 S3 simulator
+fakes3 -r ~/fakes3_root -p 10001
 
 rabbitmq-server

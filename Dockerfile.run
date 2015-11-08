@@ -15,11 +15,8 @@ RUN \
   echo "deb http://ftp.us.debian.org/debian wheezy-backports main" >> /etc/apt/sources.list && \
   apt-get clean && \
   apt-get update && \
-  apt-get -y install mongodb && \
-  apt-get -y install memcached && \
-  apt-get -y install jq && \
-  apt-get -y install wget && \
-  apt-get -y install nginx && \
+  apt-get -y install mongodb memcached jq wget nginx ruby s3cmd && \
+  gem install fakes3 && \
   sed 's/root .*\;/root \/var\/www\/html\;/' -i /etc/nginx/sites-available/default && \
   sed 's/^bind_ip/#bind_ip/' -i /etc/mongodb.conf && \
   sed 's/DAEMON_OPTS:-\"--unixSocketPrefix/DAEMON_OPTS:-\"--rest --unixSocketPrefix/' -i /etc/init.d/mongodb && \
@@ -43,3 +40,5 @@ EXPOSE 28018
 EXPOSE 11211
 # - nginx
 EXPOSE 80
+# - fakeS3
+EXPOSE 10001
