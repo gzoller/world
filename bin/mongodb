@@ -21,7 +21,7 @@ RETVAL=0
 
 start() {
     echo -n $"Starting $prog: "
-    $mongod --fork --logpath /var/log/mongodb.log --logappend 2>&1 >>/var/log/mongodb.log
+    $mongod --smallfiles --fork --logpath /var/log/mongodb.log --logappend 2>&1 >>/var/log/mongodb.log
     RETVAL=$?
     echo
     [ $RETVAL -eq 0 ] && touch /var/lock/subsys/$prog
