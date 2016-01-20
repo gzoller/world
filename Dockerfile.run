@@ -2,6 +2,7 @@ FROM ubuntu
 
 # Add files.
 ADD bin/start /usr/local/bin/
+ADD bin/check.sh /usr/local/bin/
 ADD bin/harness.json /var/www/html/
 ADD bin/rabbitmq.config /etc/rabbitmq/rabbitmq.config
 ADD bin/mongodb /etc/init.d/

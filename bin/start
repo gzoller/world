@@ -59,4 +59,7 @@ fi
 # fakes3 S3 simulator
 fakes3 -r ~/fakes3_root -p 10001 &
 
+# status checker
+check.sh &
+
 rabbitmq-server
