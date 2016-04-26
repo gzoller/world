@@ -14,10 +14,6 @@ checkProc() {
 }
 
 checkProc portster
-checkProc nginx
-checkProc mongod
-checkProc fakes3
-checkProc rabbitmq
-checkProc memcache
+#checkProc nginx
 
 echo "OK" > /var/www/html/status

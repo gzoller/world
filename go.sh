@@ -10,4 +10,4 @@ HOST_IP=`docker-machine ip $ACTIVE`
 
 # TODO: If HOST_IP not passed in, assume AWS and hit AWS's host-getter URL
 #
-docker run -d -P -v ~/.docker/machine/certs:/mnt/certs -e "DOCKER_TLS_VERIFY=true" -e HOST_IP=$HOST_IP $extra gzoller/world
+docker run -it -P -v ~/.docker/machine/certs:/mnt/certs -e "DOCKER_TLS_VERIFY=true" -e HOST_IP=$HOST_IP $extra gzoller/world

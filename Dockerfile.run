@@ -1,105 +1,74 @@
-FROM ubuntu
+FROM debian:jessie
+
+# add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
+RUN groupadd -r redis && useradd -r -g redis redis
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+		ca-certificates \
+		wget \
+	&& rm -rf /var/lib/apt/lists/*
 
 # Add files.
 ADD bin/start /usr/local/bin/
 ADD bin/check.sh /usr/local/bin/
 ADD bin/harness.json /var/www/html/
-ADD bin/rabbitmq.config /etc/rabbitmq/rabbitmq.config
-ADD bin/mongodb /etc/init.d/
 ADD portster /usr/local/bin/
 ADD containerId.sh /usr/local/bin/
 
-#--------------------------- MongoDB
-
-# Import MongoDB public GPG key AND create a MongoDB list file
-RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
-RUN echo "deb http://repo.mongodb.org/apt/ubuntu "$(lsb_release -sc)"/mongodb-org/3.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-3.0.list
-
-# Update apt-get sources AND install MongoDB
-RUN apt-get update && apt-get install -y mongodb-org=3.0.8 mongodb-org-server=3.0.8 mongodb-org-shell=3.0.8 mongodb-org-mongos=3.0.8 mongodb-org-tools=3.0.8
-
-RUN mkdir -p /data/db && chmod +x /etc/init.d/mongodb && mkdir /var/lock/subsys/
-
-#--------------------------- RabbitMQ
-
-# add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
-RUN groupadd -r rabbitmq && useradd -r -d /var/lib/rabbitmq -m -g rabbitmq rabbitmq
-
-RUN apt-get update && apt-get install -y curl ca-certificates --no-install-recommends && rm -rf /var/lib/apt/lists/*
-
 # grab gosu for easy step-down from root
-RUN gpg --keyserver ha.pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4
-RUN curl -o /usr/local/bin/gosu -SL "https://github.com/tianon/gosu/releases/download/1.6/gosu-$(dpkg --print-architecture)" \
-  && curl -o /usr/local/bin/gosu.asc -SL "https://github.com/tianon/gosu/releases/download/1.6/gosu-$(dpkg --print-architecture).asc" \
-  && gpg --verify /usr/local/bin/gosu.asc \
-  && rm /usr/local/bin/gosu.asc \
-  && chmod +x /usr/local/bin/gosu
+ENV GOSU_VERSION 1.7
+RUN set -x \
+	&& wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture)" \
+	&& wget -O /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture).asc" \
+	&& export GNUPGHOME="$(mktemp -d)" \
+	&& gpg --keyserver ha.pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 \
+	&& gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu \
+	&& rm -r "$GNUPGHOME" /usr/local/bin/gosu.asc \
+	&& chmod +x /usr/local/bin/gosu \
+	&& gosu nobody true
 
-# Add the officially endorsed Erlang debian repository:
-# See:
-#  - http://www.erlang.org/download.html
-#  - https://www.erlang-solutions.com/downloads/download-erlang-otp
-#RUN apt-key adv --keyserver ha.pool.sks-keyservers.net --recv-keys 434975BD900CCBE4F7EE1B1ED208507CA14F4FCA
-#RUN echo 'deb http://packages.erlang-solutions.com/debian jessie contrib' > /etc/apt/sources.list.d/erlang.list
+ENV REDIS_VERSION 3.0.7
+ENV REDIS_DOWNLOAD_URL http://download.redis.io/releases/redis-3.0.7.tar.gz
+ENV REDIS_DOWNLOAD_SHA1 e56b4b7e033ae8dbf311f9191cf6fdf3ae974d1c
 
-# get logs to stdout (thanks @dumbbell for pushing this upstream! :D)
-ENV RABBITMQ_LOGS=- RABBITMQ_SASL_LOGS=-
-## https://github.com/rabbitmq/rabbitmq-server/commit/53af45bf9a162dec849407d114041aad3d84feaf
+RUN apt-get update && apt-get install -y libc6-i386 --no-install-recommends && rm -rf /var/lib/apt/lists/*
 
-# http://www.rabbitmq.com/install-debian.html
-# "Please note that the word testing in this line refers to the state of our release of RabbitMQ, not any particular Debian distribution."
-RUN apt-key adv --keyserver ha.pool.sks-keyservers.net --recv-keys F78372A06FF50C80464FC1B4F7B8CEA6056E8E56
-RUN echo 'deb http://www.rabbitmq.com/debian testing main' > /etc/apt/sources.list.d/rabbitmq.list
+# for redis-sentinel see: http://redis.io/topics/sentinel
+RUN buildDeps='gcc gcc-multilib libc6-dev-i386 make' \
+	&& set -x \
+	&& apt-get update && apt-get install -y $buildDeps --no-install-recommends \
+  && apt-get install -y jq nginx \
+  && mkdir /tmp/nginx \
+  && chmod a+wrx /tmp/nginx \
+  && chmod a+wr /var/www/html/harness.json \
+  && sed 's/root .*\;/root \/var\/www\/html\;/' -i /etc/nginx/sites-available/default \
+	&& rm -rf /var/lib/apt/lists/* \
+	&& wget -O redis.tar.gz "$REDIS_DOWNLOAD_URL" \
+	&& echo "$REDIS_DOWNLOAD_SHA1 *redis.tar.gz" | sha1sum -c - \
+	&& mkdir -p /usr/src/redis \
+	&& tar -xzf redis.tar.gz -C /usr/src/redis --strip-components=1 \
+	&& rm redis.tar.gz \
+	&& make -C /usr/src/redis 32bit \
+	&& make -C /usr/src/redis install \
+	&& rm -r /usr/src/redis \
+	&& apt-get purge -y --auto-remove $buildDeps
 
-ENV RABBITMQ_VERSION 3.5.7-1
+RUN mkdir /data && chown redis:redis /data
+VOLUME /data
+WORKDIR /data
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-#    erlang erlang-mnesia erlang-public-key erlang-crypto erlang-ssl erlang-asn1 erlang-inets erlang-os-mon erlang-xmerl erlang-eldap \
-rabbitmq-server \
-#    rabbitmq-server=$RABBITMQ_VERSION \
-  && rm -rf /var/lib/apt/lists/*
+#COPY docker-entrypoint.sh /usr/local/bin/
+#RUN ln -s usr/local/bin/docker-entrypoint.sh /entrypoint.sh # backwards compat
+#ENTRYPOINT ["docker-entrypoint.sh"]
+ENTRYPOINT ["start"]
 
-# /usr/sbin/rabbitmq-server has some irritating behavior, and only exists to "su - rabbitmq /usr/lib/rabbitmq/bin/rabbitmq-server ..."
-ENV PATH /usr/lib/rabbitmq/bin:$PATH
+# Expose ports.
+# - nginx
+EXPOSE 80
+# - redis
+EXPOSE 6379
 
-RUN echo '[{rabbit, [{loopback_users, []}]}].' > /etc/rabbitmq/rabbitmq.config
-
-VOLUME /var/lib/rabbitmq
-
-# add a symlink to the .erlang.cookie in /root so we can "docker exec rabbitmqctl ..." without gosu
-RUN ln -sf /var/lib/rabbitmq/.erlang.cookie /root/
-
-EXPOSE 4369 5671 5672 25672
-
-#--------------------------- Everything else...
-
-RUN \
-  mkdir /tmp/nginx && \
-  chmod a+wrx /tmp/nginx && \
-  chmod a+wr /var/www/html/harness.json && \
-  apt-get update && \
-  apt-get -y install memcached jq wget nginx ruby s3cmd && \
-  gem install fakes3 && \
-  sed 's/root .*\;/root \/var\/www\/html\;/' -i /etc/nginx/sites-available/default && \
-  sed 's/^-l 127\.0\.0\.1/#-l 127\.0\.0\.1/' -i /etc/memcached.conf && \
-  rabbitmq-plugins enable rabbitmq_management
+CMD [ "redis-server" ]
 
 # WWW DocRoot
 # /usr/share/nginx/www
-
-# Define default command.
-CMD ["start"]
-
-# Expose ports.
-# - RabbitMQ
-EXPOSE 5672
-EXPOSE 15672
-# - MongoDB
-EXPOSE 27017
-EXPOSE 28018
-# - memcached
-EXPOSE 11211
-# - nginx
-EXPOSE 80
-# - fakeS3
-EXPOSE 10001

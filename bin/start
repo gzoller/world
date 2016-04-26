@@ -13,53 +13,50 @@ until [ $? -eq 0 ]; do
 	checkPorts
 done 
 HTTP_PORT="`wget -qO- localhost:1411/port/80`"
-MONGO_PORT="`wget -qO- localhost:1411/port/27017`"
-MEMCACHE_PORT="`wget -qO- localhost:1411/port/11211`"
-RABBIT_PORT="`wget -qO- localhost:1411/port/5672`"
-S3_PORT="`wget -qO- localhost:1411/port/10001`"
+REDIS_PORT="`wget -qO- localhost:1411/port/6379`"
 
 sed 's/HOSTIP/'"$HOST_IP"'/g' -i /var/www/html/harness.json
 sed 's/HTTP_PORT/'"$HTTP_PORT"'/g' -i /var/www/html/harness.json
-sed 's/MONGO_PORT/'"$MONGO_PORT"'/g' -i /var/www/html/harness.json
-sed 's/MEMCACHE_PORT/'"$MEMCACHE_PORT"'/g' -i /var/www/html/harness.json
-sed 's/RABBIT_PORT/'"$RABBIT_PORT"'/g' -i /var/www/html/harness.json
-sed 's/S3_PORT/'"$S3_PORT"'/g' -i /var/www/html/harness.json
+sed 's/REDIS_PORT/'"$REDIS_PORT"'/g' -i /var/www/html/harness.json
 
-if [ -e "/extra/config/app.config" ]; then
-	appconfig=`cat /extra/config/app.config`
-	jq ".applications |= .+ [ $appconfig ]" /var/www/html/harness.json > /tmp/nginx/harness.json
-	cp /tmp/nginx/harness.json /var/www/html/harness.json
-	chmod a+wr /tmp/nginx/harness.json
-fi
+#if [ -e "/extra/config/app.config" ]; then
+#	appconfig=`cat /extra/config/app.config`
+#	jq ".applications |= .+ [ $appconfig ]" /var/www/html/harness.json > /tmp/nginx/harness.json
+#	cp /tmp/nginx/harness.json /var/www/html/harness.json
+#	chmod a+wr /tmp/nginx/harness.json
+#fi
 
 service nginx start
-service mongodb start
-service memcached start
 
 # If user has mounted (vid Docker's -v argument) a directory /import then we'll 
 # slurp data from that directory into MongoDB using the file names as collection names.
-if [ -d "/extra/mongo" ]; then
-	for dbdir in $(ls -d /extra/mongo/*); do
-		db=$(basename $dbdir)
-		for f in $(ls $dbdir/*.js); do
-			filename=$(basename $f)
-			coll=${filename%.*}
-			mongoimport --db $db --collection $coll --file $f
-		done
-	done
-fi
+#if [ -d "/extra/mongo" ]; then
+#	for dbdir in $(ls -d /extra/mongo/*); do
+#		db=$(basename $dbdir)
+#		for f in $(ls $dbdir/*.js); do
+#			filename=$(basename $f)
+#			coll=${filename%.*}
+#			mongoimport --db $db --collection $coll --file $f
+#		done
+#	done
+#fi
 
 # If /extra is mounted then look for app.config file and glom its contents
 # into the 'applications' section of harness.json
 
-if [ -d "/extra/http" ]; then
-	cp /extra/http/* /var/www/html/
-fi
-
-# fakes3 S3 simulator
-fakes3 -r ~/fakes3_root -p 10001 &
+#if [ -d "/extra/http" ]; then
+#	cp /extra/http/* /var/www/html/
+#fi
 
 # status checker
 check.sh &
 
-rabbitmq-server
+set -e
+
+# allow the container to be started with `--user`
+if [ "$1" = 'redis-server' -a "$(id -u)" = '0' ]; then
+	chown -R redis .
+	exec gosu redis "$0" "$@"
+fi
+
+exec "$@"
