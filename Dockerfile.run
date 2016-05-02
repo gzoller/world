@@ -1,4 +1,4 @@
-FROM debian:jessie
+FROM aibano/ubuntu-java-8
 
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
 RUN groupadd -r redis && useradd -r -g redis redis
@@ -14,6 +14,16 @@ ADD bin/check.sh /usr/local/bin/
 ADD bin/harness.json /var/www/html/
 ADD portster /usr/local/bin/
 ADD containerId.sh /usr/local/bin/
+
+#---------------------------
+# Kafka and Zookeeper
+ENV DEBIAN_FRONTEND noninteractive
+ENV SCALA_VERSION 2.11
+ENV KAFKA_VERSION 0.10.1.0-SNAPSHOT
+ENV KAFKA_HOME /opt/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION"
+COPY bin/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION".tgz /tmp/
+#ADD scripts/start-kafka.sh /usr/bin/start-kafka.sh
+ADD bin/kafka.conf bin/zookeeper.conf /etc/supervisor/conf.d/
 
 # grab gosu for easy step-down from root
 ENV GOSU_VERSION 1.7
@@ -37,7 +47,7 @@ RUN apt-get update && apt-get install -y libc6-i386 --no-install-recommends && r
 RUN buildDeps='gcc gcc-multilib libc6-dev-i386 make' \
 	&& set -x \
 	&& apt-get update && apt-get install -y $buildDeps --no-install-recommends \
-  && apt-get install -y jq nginx \
+  && apt-get install -y jq nginx zookeeper supervisor dnsutils \
   && mkdir /tmp/nginx \
   && chmod a+wrx /tmp/nginx \
   && chmod a+wr /var/www/html/harness.json \
@@ -51,9 +61,13 @@ RUN buildDeps='gcc gcc-multilib libc6-dev-i386 make' \
 	&& make -C /usr/src/redis 32bit \
 	&& make -C /usr/src/redis install \
 	&& rm -r /usr/src/redis \
+  && tar xfz /tmp/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION".tgz -C /opt \
+  && echo "auto.create.topics.enable=true" >> /opt/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION"/config/server.properties \
+  && rm /tmp/kafka_"$SCALA_VERSION"-"$KAFKA_VERSION".tgz \
 	&& apt-get purge -y --auto-remove $buildDeps
 
-RUN mkdir /data && chown redis:redis /data
+#RUN mkdir /data && chown redis:redis /data
+RUN chown redis:redis /data
 VOLUME /data
 WORKDIR /data
 
@@ -67,8 +81,12 @@ ENTRYPOINT ["start"]
 EXPOSE 80
 # - redis
 EXPOSE 6379
+# - kafka (2181 is zookeeper, 9092 is kafka)
+EXPOSE 2181 9092
 
-CMD [ "redis-server" ]
+#CMD [ "redis-server" ]
+
+CMD ["supervisord", "-n"]
 
 # WWW DocRoot
 # /usr/share/nginx/www
