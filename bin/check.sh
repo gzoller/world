@@ -14,6 +14,7 @@ checkProc() {
 }
 
 checkProc portster
-#checkProc nginx
+checkProc nginx
+checkProc redis-server
 
 echo "OK" > /var/www/html/status

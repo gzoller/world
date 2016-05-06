@@ -14,6 +14,9 @@ until [ $? -eq 0 ]; do
 done 
 HTTP_PORT="`wget -qO- localhost:1411/port/80`"
 REDIS_PORT="`wget -qO- localhost:1411/port/6379`"
+KAFKA_PORT="`wget -qO- localhost:1411/port/9092`"
+export ADVERTISED_PORT=$KAFKA_PORT
+export ADVERTISED_HOST=$HOST_IP
 
 sed 's/HOSTIP/'"$HOST_IP"'/g' -i /var/www/html/harness.json
 sed 's/HTTP_PORT/'"$HTTP_PORT"'/g' -i /var/www/html/harness.json
@@ -59,5 +62,7 @@ if [ "$1" = 'redis-server' -a "$(id -u)" = '0' ]; then
 	exec gosu redis "$0" "$@"
 fi
 
+supervisord -n &
+
 #exec "$@"
-exec "redis-server" &
+exec "redis-server"
