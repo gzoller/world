@@ -10,12 +10,24 @@
 			"port":HTTP_PORT
 		},
 		"storage":{
+			"mongoDB":{
+				"uris":["HOSTIP:MONGO_PORT"]
+			},
+			"s3":{
+				"uid":"123",
+				"pwd":"abc",
+				"endpoint":"http://HOSTIP:S3_PORT"
+			}
 		},
 		"queue":{
+			"kafka":{
+				"host":"HOSTIP:KAFKA_PORT"
+			}
 		},
 		"cache":{
 			"redis":{
-				"uris":["HOSTIP:REDIS_PORT"]
+				"host":"HOSTIP",
+				"port":"REDIS_PORT"
 			}
 		}
 	},
