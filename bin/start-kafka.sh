@@ -15,14 +15,15 @@ if [ ! -z "$HELIOS_PORT_kafka" ]; then
 fi
 
 # Set the external host and port
-if [ ! -z "$ADVERTISED_HOST" ]; then
-    echo "advertised host: $ADVERTISED_HOST"
-    sed -r -i "s/#(advertised.host.name)=(.*)/\1=$ADVERTISED_HOST/g" $KAFKA_HOME/config/server.properties
-fi
-if [ ! -z "$ADVERTISED_PORT" ]; then
-    echo "advertised port: $ADVERTISED_PORT"
-    sed -r -i "s/#(advertised.port)=(.*)/\1=$ADVERTISED_PORT/g" $KAFKA_HOME/config/server.properties
-fi
+# WARNING: This doesn't work for Kafka 0.10.0.0+ as these env vars are no longer present in the properties file!
+#if [ ! -z "$ADVERTISED_HOST" ]; then
+#    echo "advertised host: $ADVERTISED_HOST"
+#    sed -r -i "s/#(advertised.host.name)=(.*)/\1=$ADVERTISED_HOST/g" $KAFKA_HOME/config/server.properties
+#fi
+#if [ ! -z "$ADVERTISED_PORT" ]; then
+#    echo "advertised port: $ADVERTISED_PORT"
+#    sed -r -i "s/#(advertised.port)=(.*)/\1=$ADVERTISED_PORT/g" $KAFKA_HOME/config/server.properties
+#fi
 
 # Set the zookeeper chroot
 if [ ! -z "$ZK_CHROOT" ]; then
