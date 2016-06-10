@@ -16,6 +16,7 @@ HTTP_PORT="`wget -qO- localhost:1411/port/80`"
 MONGO_PORT="`wget -qO- localhost:1411/port/27017`"
 REDIS_PORT="`wget -qO- localhost:1411/port/6379`"
 KAFKA_PORT="`wget -qO- localhost:1411/port/9092`"
+ZOO_PORT="`wget -qO- localhost:1411/port/2181`"
 S3_PORT="`wget -qO- localhost:1411/port/10001`"
 export ADVERTISED_PORT=$KAFKA_PORT
 export ADVERTISED_HOST=$HOST_IP
@@ -28,6 +29,7 @@ sed 's/HOSTIP/'"$HOST_IP"'/g' -i /var/www/html/harness.json
 sed 's/HTTP_PORT/'"$HTTP_PORT"'/g' -i /var/www/html/harness.json
 sed 's/REDIS_PORT/'"$REDIS_PORT"'/g' -i /var/www/html/harness.json
 sed 's/KAFKA_PORT/'"$KAFKA_PORT"'/g' -i /var/www/html/harness.json
+sed 's/ZOO_PORT/'"$ZOO_PORT"'/g' -i /var/www/html/harness.json
 sed 's/MONGO_PORT/'"$MONGO_PORT"'/g' -i /var/www/html/harness.json
 sed 's/S3_PORT/'"$S3_PORT"'/g' -i /var/www/html/harness.json
 

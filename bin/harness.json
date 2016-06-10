@@ -21,7 +21,8 @@
 		},
 		"queue":{
 			"kafka":{
-				"host":"HOSTIP:KAFKA_PORT"
+				"kafkaHost":"HOSTIP:KAFKA_PORT",
+				"zookeeperHost":"HOSTIP:ZOO_PORT"
 			}
 		},
 		"cache":{
