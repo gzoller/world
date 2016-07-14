@@ -14,27 +14,27 @@ until [ $? -eq 0 ]; do
 done 
 HTTP_PORT="`wget -qO- localhost:1411/port/80`"
 MONGO_PORT="`wget -qO- localhost:1411/port/27017`"
-MEMCACHE_PORT="`wget -qO- localhost:1411/port/11211`"
-RABBIT_PORT="`wget -qO- localhost:1411/port/5672`"
+REDIS_PORT="`wget -qO- localhost:1411/port/6379`"
+KAFKA_PORT="`wget -qO- localhost:1411/port/9092`"
+ZOO_PORT="`wget -qO- localhost:1411/port/2181`"
 S3_PORT="`wget -qO- localhost:1411/port/10001`"
+export ADVERTISED_PORT=$KAFKA_PORT
+export ADVERTISED_HOST=$HOST_IP
+
+# try setting listeners to $HOST_IP:$KAFKA_PORT too if this doesn't work
+#sed 's/\#listeners=PLAINTEXT:\/\/:9092/'"listeners=PLAINTEXT:\/\/$HOST_IP:$KAFKA_PORT"'/g' -i /opt/kafka_2.11-0.10.0.0/config/server.properties
+sed 's/\#advertised.listeners=PLAINTEXT:\/\/your.host.name:9092/'"advertised.listeners=PLAINTEXT:\/\/$HOST_IP:$KAFKA_PORT"'/g' -i /opt/kafka_2.11-0.10.0.0/config/server.properties
 
 sed 's/HOSTIP/'"$HOST_IP"'/g' -i /var/www/html/harness.json
 sed 's/HTTP_PORT/'"$HTTP_PORT"'/g' -i /var/www/html/harness.json
+sed 's/REDIS_PORT/'"$REDIS_PORT"'/g' -i /var/www/html/harness.json
+sed 's/KAFKA_PORT/'"$KAFKA_PORT"'/g' -i /var/www/html/harness.json
+sed 's/ZOO_PORT/'"$ZOO_PORT"'/g' -i /var/www/html/harness.json
 sed 's/MONGO_PORT/'"$MONGO_PORT"'/g' -i /var/www/html/harness.json
-sed 's/MEMCACHE_PORT/'"$MEMCACHE_PORT"'/g' -i /var/www/html/harness.json
-sed 's/RABBIT_PORT/'"$RABBIT_PORT"'/g' -i /var/www/html/harness.json
 sed 's/S3_PORT/'"$S3_PORT"'/g' -i /var/www/html/harness.json
-
-if [ -e "/extra/config/app.config" ]; then
-	appconfig=`cat /extra/config/app.config`
-	jq ".applications |= .+ [ $appconfig ]" /var/www/html/harness.json > /tmp/nginx/harness.json
-	cp /tmp/nginx/harness.json /var/www/html/harness.json
-	chmod a+wr /tmp/nginx/harness.json
-fi
 
 service nginx start
 service mongodb start
-service memcached start
 
 # If user has mounted (vid Docker's -v argument) a directory /import then we'll 
 # slurp data from that directory into MongoDB using the file names as collection names.
@@ -51,6 +51,12 @@ fi
 
 # If /extra is mounted then look for app.config file and glom its contents
 # into the 'applications' section of harness.json
+if [ -e "/extra/config/app.config" ]; then
+	appconfig=`cat /extra/config/app.config`
+	jq ".applications |= .+ [ $appconfig ]" /var/www/html/harness.json > /tmp/nginx/harness.json
+	cp /tmp/nginx/harness.json /var/www/html/harness.json
+	chmod a+wr /tmp/nginx/harness.json
+fi
 
 if [ -d "/extra/http" ]; then
 	cp /extra/http/* /var/www/html/
@@ -62,4 +68,15 @@ fakes3 -r ~/fakes3_root -p 10001 &
 # status checker
 check.sh &
 
-rabbitmq-server
+set -e
+
+# allow the container to be started with `--user`
+if [ "$1" = 'redis-server' -a "$(id -u)" = '0' ]; then
+	chown -R redis .
+	exec gosu redis "$0" "$@"
+fi
+
+supervisord -n &
+
+#exec "$@"
+exec "redis-server"

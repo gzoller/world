@@ -23,11 +23,12 @@ Now you should have gzoller/world in your docker images.  Use the go.sh script p
 | port  | purpose |
 | :------------ |:---------- |
 | 80      | www (nginx)
-| 5672 | RabbitMQ (AMQP)
-| 15672 | RabbitMQ (web admin)
+| 9092 | Kafka
+| 2181 | Zookeeper
 | 27017 | MongoDB
 | 28017 | MongoDB (web status)
-| 11211 | memcached
+| 6379 | Redis
+| 10001 | S3 simulator (FakeS3)
 
 To connect to these facilities you'll need to know the IP address for Docker as exposed by your VM.  For docker-machine you can find this by:
 

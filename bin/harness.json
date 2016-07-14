@@ -1,7 +1,7 @@
 {
 	"name":"World Server",
 	"version":1,
-	"description":"All-in-one 'world' incl. mongodb, rabbitmq, memcached, nginx, and more.",
+	"description":"All-in-one 'world' environment.",
 	"env" : "Disposable",
 	"isProd" : false,
 	"isContainer" : true,
@@ -20,18 +20,15 @@
 			}
 		},
 		"queue":{
-			"rabbitMQ":{
-				"hosts":[{
-					"host":"HOSTIP",
-					"port":RABBIT_PORT
-					}],
-				"uid":"guest",
-				"pwd":"guest"
+			"kafka":{
+				"kafkaHost":"HOSTIP:KAFKA_PORT",
+				"zookeeperHost":"HOSTIP:ZOO_PORT"
 			}
 		},
 		"cache":{
-			"memcached":{
-				"uris":["HOSTIP:MEMCACHE_PORT"]
+			"redis":{
+				"host":"HOSTIP",
+				"port":"REDIS_PORT"
 			}
 		}
 	},
