@@ -8,7 +8,6 @@ ADD bin/start /usr/local/bin/
 ADD bin/start-kafka.sh /usr/bin/
 ADD bin/check.sh /usr/local/bin/
 ADD bin/harness.json /var/www/html/
-ADD bin/mongodb /etc/init.d/
 ADD portster /usr/local/bin/
 ADD containerId.sh /usr/local/bin/
 
@@ -19,42 +18,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
   jq nginx zookeeper supervisor dnsutils ruby s3cmd \
   && rm -rf /var/lib/apt/lists/*
 
-#--------------------------- MongoDB
+#--------------------------- DynamoDB
 
-# Import MongoDB public GPG key AND create a MongoDB list file
-
-RUN mkdir -p /data/db && chmod +x /etc/init.d/mongodb && mkdir /var/lock/subsys/
-
-# add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
-RUN groupadd -r mongodb && useradd -r -g mongodb mongodb
-
-ENV GPG_KEYS \
-  DFFA3DCF326E302C4787673A01C4E7FAAAB2461C \
-  42F3E95A2C4F08279C4960ADD68FA50FEA312927
-RUN set -ex \
-  && for key in $GPG_KEYS; do \
-    apt-key adv --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
-  done
-
-ENV MONGO_MAJOR 3.2
-ENV MONGO_VERSION 3.2.6
-
-RUN echo "deb http://repo.mongodb.org/apt/debian wheezy/mongodb-org/$MONGO_MAJOR main" > /etc/apt/sources.list.d/mongodb-org.list
-
-RUN set -x \
-  && apt-get update \
-  && apt-get install -y \
-    mongodb-org=$MONGO_VERSION \
-    mongodb-org-server=$MONGO_VERSION \
-    mongodb-org-shell=$MONGO_VERSION \
-    mongodb-org-mongos=$MONGO_VERSION \
-    mongodb-org-tools=$MONGO_VERSION \
-  && rm -rf /var/lib/apt/lists/* \
-  && rm -rf /var/lib/mongodb \ 
-  && mv /etc/mongod.conf /etc/mongod.conf.orig
-
-RUN mkdir -p /data/db /data/configdb \
-  && chown -R mongodb:mongodb /data/db /data/configdb
+RUN mkdir /var/dynamodb_wd \
+  && wget -O /var/dynamodb_wd/dynamodb_local_latest http://dynamodb-local.s3-website-us-west-2.amazonaws.com/dynamodb_local_latest \
+  && tar xfz /var/dynamodb_wd/dynamodb_local_latest \
+  && rm -rf /var/dynamodb_wd
+RUN mkdir /var/dynamodb_local
 
 #---------------------------
 # Kafka and Zookeeper
@@ -122,9 +92,8 @@ EXPOSE 6379
 EXPOSE 2181 9092
 # - fakeS3
 EXPOSE 10001
-# - MongoDB
-EXPOSE 27017
-EXPOSE 28018
+# - DynamoDB
+EXPOSE 8000
 
 # WWW DocRoot
 # /usr/share/nginx/www

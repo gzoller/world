@@ -13,7 +13,7 @@ until [ $? -eq 0 ]; do
 	checkPorts
 done 
 HTTP_PORT="`wget -qO- localhost:1411/port/80`"
-MONGO_PORT="`wget -qO- localhost:1411/port/27017`"
+DYNAMO_PORT="`wget -qO- localhost:1411/port/8000`"
 REDIS_PORT="`wget -qO- localhost:1411/port/6379`"
 KAFKA_PORT="`wget -qO- localhost:1411/port/9092`"
 ZOO_PORT="`wget -qO- localhost:1411/port/2181`"
@@ -22,7 +22,6 @@ export ADVERTISED_PORT=$KAFKA_PORT
 export ADVERTISED_HOST=$HOST_IP
 
 # try setting listeners to $HOST_IP:$KAFKA_PORT too if this doesn't work
-#sed 's/\#listeners=PLAINTEXT:\/\/:9092/'"listeners=PLAINTEXT:\/\/$HOST_IP:$KAFKA_PORT"'/g' -i /opt/kafka_2.11-0.10.0.0/config/server.properties
 sed 's/\#advertised.listeners=PLAINTEXT:\/\/your.host.name:9092/'"advertised.listeners=PLAINTEXT:\/\/$HOST_IP:$KAFKA_PORT"'/g' -i /opt/kafka_2.11-0.10.0.0/config/server.properties
 
 sed 's/HOSTIP/'"$HOST_IP"'/g' -i /var/www/html/harness.json
@@ -30,24 +29,11 @@ sed 's/HTTP_PORT/'"$HTTP_PORT"'/g' -i /var/www/html/harness.json
 sed 's/REDIS_PORT/'"$REDIS_PORT"'/g' -i /var/www/html/harness.json
 sed 's/KAFKA_PORT/'"$KAFKA_PORT"'/g' -i /var/www/html/harness.json
 sed 's/ZOO_PORT/'"$ZOO_PORT"'/g' -i /var/www/html/harness.json
-sed 's/MONGO_PORT/'"$MONGO_PORT"'/g' -i /var/www/html/harness.json
+sed 's/DYNAMO_PORT/'"$DYNAMO_PORT"'/g' -i /var/www/html/harness.json
 sed 's/S3_PORT/'"$S3_PORT"'/g' -i /var/www/html/harness.json
 
 service nginx start
 service mongodb start
-
-# If user has mounted (vid Docker's -v argument) a directory /import then we'll 
-# slurp data from that directory into MongoDB using the file names as collection names.
-if [ -d "/extra/mongo" ]; then
-	for dbdir in $(ls -d /extra/mongo/*); do
-		db=$(basename $dbdir)
-		for f in $(ls $dbdir/*.js); do
-			filename=$(basename $f)
-			coll=${filename%.*}
-			mongoimport --db $db --collection $coll --file $f
-		done
-	done
-fi
 
 # If /extra is mounted then look for app.config file and glom its contents
 # into the 'applications' section of harness.json
@@ -64,6 +50,9 @@ fi
 
 # fakes3 S3 simulator
 fakes3 -r ~/fakes3_root -p 10001 &
+
+# DynamoDB
+/usr/bin/java -Djava.library.path=. -jar DynamoDBLocal.jar -dbPath /var/dynamodb_local -port 8000 &
 
 # status checker
 check.sh &

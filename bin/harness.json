@@ -10,8 +10,8 @@
 			"port":HTTP_PORT
 		},
 		"storage":{
-			"mongoDB":{
-				"uris":["HOSTIP:MONGO_PORT"]
+			"DynamoDB":{
+				"uris":["HOSTIP:DYNAMO_PORT"]
 			},
 			"s3":{
 				"uid":"123",
