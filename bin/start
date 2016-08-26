@@ -14,6 +14,7 @@ until [ $? -eq 0 ]; do
 done 
 HTTP_PORT="`wget -qO- localhost:1411/port/80`"
 DYNAMO_PORT="`wget -qO- localhost:1411/port/8000`"
+MONGO_PORT="`wget -qO- localhost:1411/port/27017`"
 REDIS_PORT="`wget -qO- localhost:1411/port/6379`"
 KAFKA_PORT="`wget -qO- localhost:1411/port/9092`"
 ZOO_PORT="`wget -qO- localhost:1411/port/2181`"
@@ -30,10 +31,24 @@ sed 's/REDIS_PORT/'"$REDIS_PORT"'/g' -i /var/www/html/harness.json
 sed 's/KAFKA_PORT/'"$KAFKA_PORT"'/g' -i /var/www/html/harness.json
 sed 's/ZOO_PORT/'"$ZOO_PORT"'/g' -i /var/www/html/harness.json
 sed 's/DYNAMO_PORT/'"$DYNAMO_PORT"'/g' -i /var/www/html/harness.json
+sed 's/MONGO_PORT/'"$MONGO_PORT"'/g' -i /var/www/html/harness.json
 sed 's/S3_PORT/'"$S3_PORT"'/g' -i /var/www/html/harness.json
 
 service nginx start
 service mongodb start
+
+# If user has mounted (vid Docker's -v argument) a directory /import then we'll 
+# slurp data from that directory into MongoDB using the file names as collection names.
+if [ -d "/extra/mongo" ]; then
+	for dbdir in $(ls -d /extra/mongo/*); do
+		db=$(basename $dbdir)
+		for f in $(ls $dbdir/*.js); do
+			filename=$(basename $f)
+			coll=${filename%.*}
+			mongoimport --db $db --collection $coll --file $f
+		done
+	done
+fi
 
 # If /extra is mounted then look for app.config file and glom its contents
 # into the 'applications' section of harness.json

@@ -17,6 +17,7 @@ checkProc portster
 checkProc nginx
 checkProc redis-server
 checkProc fakes3
+checkProc mongod
 checkProc DynamoDBLocal
 checkProc zookeeper
 
