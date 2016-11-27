@@ -31,7 +31,7 @@
 		"cache":{
 			"redis":{
 				"host":"HOSTIP",
-				"port":"REDIS_PORT"
+				"port":REDIS_PORT
 			}
 		}
 	},
