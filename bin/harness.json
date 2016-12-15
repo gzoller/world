@@ -20,6 +20,9 @@
 				"uid":"123",
 				"pwd":"abc",
 				"endpoint":"http://HOSTIP:S3_PORT"
+			},
+			"postgres":{
+				"port":POSTGRES_PORT
 			}
 		},
 		"queue":{

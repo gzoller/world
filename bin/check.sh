@@ -20,5 +20,6 @@ checkProc fakes3
 checkProc mongod
 checkProc DynamoDBLocal
 checkProc zookeeper
+checkProc postgres
 
 echo "OK" > /var/www/html/status
