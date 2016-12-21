@@ -22,7 +22,7 @@
 				"endpoint":"http://HOSTIP:S3_PORT"
 			},
 			"postgres":{
-				"uri":"jdbc:postgresql://localhost:POSTGRES_PORT/postgres",
+				"uri":"jdbc:postgresql://HOSTIP:POSTGRES_PORT/postgres",
 				"user":"postgres",
 				"password":"123"
 			}
