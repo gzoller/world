@@ -1,0 +1,26 @@
+#!/bin/bash
+
+#export DOCKER_CERT_PATH=/mnt/certs
+#export DOCKER_HOST=tcp://$HOST_IP:2376
+chmod a+rx /var/run/docker.sock
+
+HTTP_PORT="`extPort.sh 80`"
+REDIS_PORT="`extPort.sh 6379`"
+KAFKA_PORT="`extPort.sh 9092`"
+ZOO_PORT="`extPort.sh 2181`"
+S3_PORT="`extPort.sh 10001`"
+POSTGRES_PORT="`extPort.sh 5432`"
+export ADVERTISED_PORT=$KAFKA_PORT
+export ADVERTISED_HOST=$HOST_IP
+
+# try setting listeners to $HOST_IP:$KAFKA_PORT too if this doesn't work
+#sed 's/\#advertised.listeners=PLAINTEXT:\/\/your.host.name:9092/'"advertised.listeners=PLAINTEXT:\/\/$HOST_IP:$KAFKA_PORT"'/g' -i /opt/kafka_2.11-0.10.0.0/config/server.properties
+
+sed 's/HOSTIP/'"$HOST_IP"'/g' -i /var/www/html/harness.json
+sed 's/HTTP_PORT/'"$HTTP_PORT"'/g' -i /var/www/html/harness.json
+sed 's/REDIS_PORT/'"$REDIS_PORT"'/g' -i /var/www/html/harness.json
+sed 's/KAFKA_PORT/'"$KAFKA_PORT"'/g' -i /var/www/html/harness.json
+sed 's/ZOO_PORT/'"$ZOO_PORT"'/g' -i /var/www/html/harness.json
+sed 's/S3_PORT/'"$S3_PORT"'/g' -i /var/www/html/harness.json
+sed 's/POSTGRES_PORT/'"$POSTGRES_PORT"'/g' -i /var/www/html/harness.json
+

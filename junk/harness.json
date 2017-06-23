@@ -19,10 +19,6 @@
 				"uri":"jdbc:postgresql://HOSTIP:POSTGRES_PORT/postgres",
 				"user":"postgres",
 				"password":"123"
-			},
-			"eventstore":{
-				"tcp_port":EVENTSTORE_TCP,
-				"http_port":EVENTSTORE_HTTP
 			}
 		},
 		"queue":{
@@ -36,7 +32,7 @@
 				"host":"HOSTIP",
 				"port":REDIS_PORT
 			}
-		},
+		}
 	},
 	"applications":[
 	]

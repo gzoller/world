@@ -15,13 +15,11 @@ checkProc() {
 	echo "$1 Running"
 }
 
-checkProc portster
 checkProc nginx
 checkProc postgres
 checkProc redis-server
 checkProc fakes3
-checkProc mongod
-checkProc DynamoDBLocal
 checkProc zookeeper
+checkProc eventstored
 
 echo "OK" > /var/www/html/status
