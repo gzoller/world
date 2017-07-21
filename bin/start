@@ -8,8 +8,8 @@ KAFKA_PORT="`extPort.sh 9092`"
 ZOO_PORT="`extPort.sh 2181`"
 S3_PORT="`extPort.sh 10001`"
 POSTGRES_PORT="`extPort.sh 5432`"
-EVENTSTORE_TCP_PORT="`extPort.sh 1113`"
-EVENTSTORE_HTTP_PORT="`extPort.sh 2113`"
+EVENTSTORE_TCP="`extPort.sh 1113`"
+EVENTSTORE_HTTP="`extPort.sh 2113`"
 export ADVERTISED_PORT=$KAFKA_PORT
 export ADVERTISED_HOST=$HOST_IP
 
