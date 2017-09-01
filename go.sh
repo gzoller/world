@@ -5,9 +5,9 @@ if [ ! -z "$1" ]; then
   extra="-v $1:/extra"
 fi
 
-ACTIVE=`docker-machine active 2>/dev/null`
-HOST_IP=`docker-machine ip $ACTIVE`
+# This works on a Mac.  Mileage may vary on other *nix systems
+HOST_IP=`ifconfig en0 | awk '$1 == "inet" {print $2}'`
 
 # TODO: If HOST_IP not passed in, assume AWS and hit AWS's host-getter URL
 #
-docker run -it -P -v ~/.docker/machine/certs:/mnt/certs -e "DOCKER_TLS_VERIFY=true" -e HOST_IP=$HOST_IP $extra gzoller/world
+docker run -it -P -v /var/run/docker.sock:/var/run/docker.sock -v ~/.docker/machine/certs:/mnt/certs -e "DOCKER_TLS_VERIFY=true" -e HOST_IP=$HOST_IP $extra gzoller/world
